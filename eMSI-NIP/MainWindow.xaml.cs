@@ -2,6 +2,7 @@
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Xml;
@@ -18,14 +19,20 @@ namespace eMSI_NIP
         private const string LENGTH_ERROR = "Numer NIP musi składać się z 10 znaków!";
         private const string CHARACTER_ERROR = "Numer NIP musi składać się tylko z cyfr!";
         private const string NOT_FOUND = "Nie znaleziono podmiotu dla podanych kryteriów wyszukiwania!";
+        //  45 minutes in miliseconds
+        private const int TICK_TIME = 45 * 60 * 1000;
 
-        private string sid;
-        private UslugaBIRzewnPublClient client;
+        private static string sid;
+        //  Timer used to relogin user after 45 minutes of using app
+        private static Timer timer;
+
+        private static UslugaBIRzewnPublClient client;
         private ParametryWyszukiwania param;
         private XmlDocument document;
 
         public MainWindow()
         {
+            timer = new Timer(Timer_Elapsed, null, TICK_TIME, Timeout.Infinite);
             client = new UslugaBIRzewnPublClient();
             param = new ParametryWyszukiwania();
             document = new XmlDocument();
@@ -39,6 +46,7 @@ namespace eMSI_NIP
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Logout();
+            timer.Dispose();
         }
 
         private void ButtonSearch_Click(object sender, RoutedEventArgs e)
@@ -76,7 +84,7 @@ namespace eMSI_NIP
 
         #region Others
 
-        private void Login()
+        private static void Login()
         {
             sid = client.Zaloguj(USER_KEY);
             OperationContextScope scope = new OperationContextScope(client.InnerChannel);
@@ -124,6 +132,12 @@ namespace eMSI_NIP
                 return false;
             }
             return true;
+        }
+
+        private static void Timer_Elapsed(object state)
+        {
+            Login();
+            timer.Change(TICK_TIME, Timeout.Infinite);
         }
 
         #endregion
