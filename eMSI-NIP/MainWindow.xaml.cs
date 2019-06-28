@@ -14,7 +14,7 @@ namespace eMSI_NIP
     /// </summary>
     public partial class MainWindow : Window
     {
-        private const string USER_KEY = "aaaaaaaaaabbbbbbbbbb";
+        private const string USER_KEY = "abcde12345abcde12345";
         private const string LENGTH_ERROR = "Numer NIP musi składać się z 10 znaków!";
         private const string CHARACTER_ERROR = "Numer NIP musi składać się tylko z cyfr!";
         private const string NOT_FOUND = "Nie znaleziono podmiotu dla podanych kryteriów wyszukiwania!";
